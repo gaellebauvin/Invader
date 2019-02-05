@@ -25,6 +25,8 @@ import fr.iutlens.mmi.invader.utils.SpriteSheet;
 
     Sprite(int id, float x, float y){
         this.sprite = SpriteSheet.get(id);
+        Object r;
+        // this.sprite = SpriteSheet.get(R.mipmap.heart);
         this.x = x;
         this.y = y;
         state = 0;

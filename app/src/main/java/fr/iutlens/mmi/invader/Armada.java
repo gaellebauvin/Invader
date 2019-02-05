@@ -26,9 +26,9 @@ class Armada extends Sprite{
         this.missile = missile;
         alien = new ArrayList<>();
 
-        for(int i = 0; i <6; ++i){
-            for(int j= 0; j< 5; ++j){
-                alien.add(new Alien(id,i*200,j*140));
+        for(int i = 0; i <6; ++i) {
+            for (int j = 0; j < 5; ++j) {
+                alien.add(new Alien(id, i * 200, j * 140));
             }
         }
 
@@ -47,9 +47,13 @@ class Armada extends Sprite{
         }
     }
 
+    public boolean isEmpty() {
+        return alien.isEmpty();
+    }
+
     @Override
     public boolean act() {
-
+        if (alien.isEmpty()) return false;
         RectF bounds = getBoundingBox();
         ++state;
 
@@ -71,7 +75,7 @@ class Armada extends Sprite{
             if (speed_y != 0) s.y+= speed_y;
             else s.x+=speed_x;
             if (s.act()) it.remove();
-            else if (Math.random()<0.005f){
+            else if (Math.random()<0.0020f){
                 missile.add(new Projectile(R.mipmap.missile,s.x+missileDx,s.y+missileDy,+15));
             }
         }
@@ -81,8 +85,7 @@ class Armada extends Sprite{
 
     public RectF getBoundingBox() {
         RectF result = null;
-        for (Alien s: alien
-                ) {
+        for (Alien s: alien) {
             final RectF boundingBox = s.getBoundingBox();
             if (result == null) result = boundingBox;
            else result.union(boundingBox);
@@ -92,6 +95,7 @@ class Armada extends Sprite{
     }
 
     public void testIntersection(List<Projectile> laser) {
+        if (alien.isEmpty()) return;
         for(Projectile p : laser){
             RectF bbox = p.getBoundingBox();
             for(Alien a: alien){
@@ -99,8 +103,8 @@ class Armada extends Sprite{
                     a.hit = true;
                     p.hit = true;
                 }
+
             }
         }
-
     }
 }

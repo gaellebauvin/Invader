@@ -10,7 +10,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Timer;
 
 import fr.iutlens.mmi.invader.utils.RefreshHandler;
 import fr.iutlens.mmi.invader.utils.SpriteSheet;
@@ -35,6 +35,13 @@ public class GameView extends View implements TimerAction {
     private Canon canon;
     private List<Projectile> missile;
     private List<Projectile> laser;
+    private GameView heart;
+    private int life;
+    private View gameOver;
+    private View newgame;
+    private View win;
+    private Projectile winSprite;
+    private int temps;
 
 
     public GameView(Context context) {
@@ -67,15 +74,17 @@ public class GameView extends View implements TimerAction {
         SpriteSheet.register(R.mipmap.missile,4,1,this.getContext());
         SpriteSheet.register(R.mipmap.laser,1,1,this.getContext());
         SpriteSheet.register(R.mipmap.canon,1,1,this.getContext());
+        SpriteSheet.register(R.mipmap.heart,2,1,this.getContext());
+        SpriteSheet.register(R.mipmap.youwin,2,1,this.getContext());
+
+
 
         transform = new Matrix();
         reverse = new Matrix();
 
-        missile = new ArrayList<>();
-        laser = new ArrayList<>();
+        winSprite = new Projectile(R.mipmap.youwin,400, 900,0);
 
-        armada = new Armada(R.mipmap.alien,missile);
-        canon = new Canon(R.mipmap.canon,800, 2200,laser);
+        initGame();
 
 
 //        hero = new Hero(R.drawable.running_rabbit,SPEED);
@@ -87,12 +96,25 @@ public class GameView extends View implements TimerAction {
         timer = new RefreshHandler(this);
 
         // Un clic sur la vue lance (ou relance) l'animation
-        this.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!timer.isRunning()) timer.scheduleRefresh(30);
-            }
-        });
+
+    }
+    public int seconds = 60;
+    public int minutes = 10;
+
+    private void initGame() {
+
+        life = 3;
+        Timer t = new Timer();
+
+        missile = new ArrayList<>();
+        laser = new ArrayList<>();
+
+        armada = new Armada(R.mipmap.alien,missile);
+        canon = new Canon(R.mipmap.canon,800, 2200,laser);
+    }
+
+    private void start() {
+        if (!timer.isRunning() && life>0) timer.scheduleRefresh(30);
     }
 
 
@@ -106,12 +128,35 @@ public class GameView extends View implements TimerAction {
     @Override
     public void update() {
         if (this.isShown()) { // Si la vue est visible
-            timer.scheduleRefresh(30); // programme le prochain rafraichissement
+            if(life>0) {
+                timer.scheduleRefresh(30); // programme le prochain rafraichissement
+            }
+            if (armada.isEmpty()){
+            winSprite.act(); }
+            else {
+                armada.testIntersection(laser);
+                armada.act();
+                canon.testIntersection(missile);
+            }
 
-            armada.testIntersection(laser);
-            armada.act();
-            canon.act();
 
+            temps++;
+
+           if( canon.act()){
+               life = life-1;
+               if (life <=0 && gameOver != null && newgame != null) {
+                   gameOver.setVisibility(View.VISIBLE);
+                   newgame.setVisibility(View.VISIBLE);
+               }
+                   canon.hit=false;
+           }
+/*
+            if (Alien <= 0) {
+               youWin.setVisibility(View.VISIBLE);
+               commencer.setVisibility(View.VISIBLE);
+            }
+
+*/
             act(missile);
             act(laser);
 
@@ -128,7 +173,7 @@ public class GameView extends View implements TimerAction {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // On met une couleur de fond
-        canvas.drawColor(0xff000077);
+        canvas.drawColor(0xff000000);
 
         // On choisit la transformation à appliquer à la vue i.e. la position
         // de la "camera"
@@ -138,11 +183,28 @@ public class GameView extends View implements TimerAction {
         for(Sprite s : missile){
             s.paint(canvas);
         }
-        for(Sprite s : laser){
-            s.paint(canvas);
+
+   /*   for(Sprite s : win){
+          s.paint(canvas);
+    }*/
+        SpriteSheet sprite = SpriteSheet.get(R.mipmap.heart);
+
+        for(int i = 1; i<= life; i++) {
+            sprite.paint(canvas,0,i*200,-100);
         }
-        canon.paint(canvas);
-        armada.paint(canvas);
+
+
+        if (armada.isEmpty() && life>0)  {
+            winSprite.paint(canvas);
+            newgame.setVisibility(View.VISIBLE);
+        }
+        else {
+            canon.paint(canvas);
+            armada.paint(canvas);
+            for (Sprite s : laser) {
+                s.paint(canvas);
+            }
+        }
 
 
         // Dessin des différents éléments
@@ -182,10 +244,12 @@ public class GameView extends View implements TimerAction {
     }
 
     public void onLeft() {
+        start();
         canon.setDirection(-1);
     }
 
     public void onRight(){
+        start();
         canon.setDirection(+1);
     }
 
@@ -194,4 +258,26 @@ public class GameView extends View implements TimerAction {
 
     }
 
+    public void setGameOver(View gameOver) {
+        this.gameOver = gameOver;
+    }
+
+    public View getGameOver() {
+        return gameOver;
+    }
+
+    public void setNewgame(View newgame) {
+        this.newgame = newgame;
+    }
+
+    public View getNewgame() {
+        return newgame;
+    }
+
+    public void restart() {
+        initGame();
+        start();
+        gameOver.setVisibility(View.INVISIBLE);
+        newgame.setVisibility(View.INVISIBLE);
+    }
 }

@@ -16,6 +16,7 @@ class Canon extends Sprite {
     private final int dxLaser;
     private final int dyLaser;
     int vx = 0;
+    private int derniertire;
 
     Canon(int id, float x, float y, List<Projectile> laser) {
         super(id, x, y);
@@ -34,7 +35,8 @@ class Canon extends Sprite {
         } else {
             vx = 0;
         }
-        return false;
+        derniertire= derniertire+1;
+        return hit;
     }
 
     public void setDirection(int i) {
@@ -45,7 +47,25 @@ class Canon extends Sprite {
 
 
     public void fire() {
-        laser.add(new Projectile(R.mipmap.laser,x+dxLaser,y+dyLaser,-20));
+
+        if (derniertire > 15) {
+            laser.add(new Projectile(R.mipmap.laser, x + dxLaser, y + dyLaser, -20));
+            derniertire=0;
+        }
+    }
+
+
+   public void testIntersection(List<Projectile> missile) {
+        for(Projectile p : missile){
+            RectF bbox = p.getBoundingBox();
+            if (bbox.intersect(getBoundingBox())) {
+                hit = true;
+                p.hit = true;
+            }
+        }
 
     }
+
 }
+
+
