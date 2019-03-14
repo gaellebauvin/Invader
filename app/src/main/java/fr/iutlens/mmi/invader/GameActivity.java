@@ -1,14 +1,15 @@
 package fr.iutlens.mmi.invader;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.media.SoundPool;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 public class GameActivity extends AppCompatActivity {
 
     private GameView gameView;
+    public SoundPool soundPool;
+    public int soundId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +21,11 @@ public class GameActivity extends AppCompatActivity {
         View gameOver = findViewById(R.id.imageViewGameOver);
         gameView.setGameOver(gameOver);
 
-        View Newgame = findViewById(R.id.newgame);
-        gameView.setNewgame(Newgame);
+        View newgame = findViewById(R.id.newgame);
+        gameView.setNewgame(newgame);
+
+//        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC,0);
+//        soundId = soundPool.load(this, R.raw.sound, 0);
 
             }
 
@@ -38,9 +42,10 @@ public class GameActivity extends AppCompatActivity {
         gameView.onFire();
     }
 
-    public void game(View View) {
-        Intent intent = new Intent(this,GameActivity.class);
-        startActivity(intent);
+    public void game(View view) {
+       // Intent intent = new Intent(this,GameActivity.class);
+       // startActivity(intent);
+        if (view.getVisibility() == View.VISIBLE) gameView.restart();
     }
 
 /*

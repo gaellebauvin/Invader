@@ -101,7 +101,7 @@ public class GameView extends View implements TimerAction {
     public int seconds = 60;
     public int minutes = 10;
 
-    private void initGame() {
+    public void initGame() {
 
         life = 3;
         Timer t = new Timer();
@@ -113,7 +113,7 @@ public class GameView extends View implements TimerAction {
         canon = new Canon(R.mipmap.canon,800, 2200,laser);
     }
 
-    private void start() {
+    public void start() {
         if (!timer.isRunning() && life>0) timer.scheduleRefresh(30);
     }
 
@@ -130,12 +130,22 @@ public class GameView extends View implements TimerAction {
         if (this.isShown()) { // Si la vue est visible
             if(life>0) {
                 timer.scheduleRefresh(30); // programme le prochain rafraichissement
+            } else {
+                if (gameOver != null && newgame != null) {
+                    gameOver.setVisibility(View.VISIBLE);
+                    newgame.setVisibility(View.VISIBLE);
+                }
             }
-            if (armada.isEmpty()){
-            winSprite.act(); }
-            else {
+        }
+        if (armada.isEmpty()){
+                winSprite.act();
+                newgame.setVisibility(View.VISIBLE);
+        } else {
                 armada.testIntersection(laser);
                 armada.act();
+                if (armada.land()){
+                    life=0;
+                }
                 canon.testIntersection(missile);
             }
 
@@ -144,11 +154,7 @@ public class GameView extends View implements TimerAction {
 
            if( canon.act()){
                life = life-1;
-               if (life <=0 && gameOver != null && newgame != null) {
-                   gameOver.setVisibility(View.VISIBLE);
-                   newgame.setVisibility(View.VISIBLE);
-               }
-                   canon.hit=false;
+               canon.hit=false;
            }
 /*
             if (Alien <= 0) {
@@ -162,7 +168,7 @@ public class GameView extends View implements TimerAction {
 
             invalidate(); // demande à rafraichir la vue
         }
-    }
+
 
     /**
      * Méthode appelée (automatiquement) pour afficher la vue
@@ -196,15 +202,17 @@ public class GameView extends View implements TimerAction {
 
         if (armada.isEmpty() && life>0)  {
             winSprite.paint(canvas);
-            newgame.setVisibility(View.VISIBLE);
+            //newgame.setVisibility(View.VISIBLE);
         }
         else {
+  //          newgame.setVisibility(View.GONE);
             canon.paint(canvas);
             armada.paint(canvas);
             for (Sprite s : laser) {
                 s.paint(canvas);
             }
         }
+
 
 
         // Dessin des différents éléments
@@ -250,6 +258,7 @@ public class GameView extends View implements TimerAction {
 
     public void onRight(){
         start();
+//        soundPool.play(soundId, 1f, 1f, 0, 0, 1f);
         canon.setDirection(+1);
     }
 
@@ -277,7 +286,7 @@ public class GameView extends View implements TimerAction {
     public void restart() {
         initGame();
         start();
-        gameOver.setVisibility(View.INVISIBLE);
-        newgame.setVisibility(View.INVISIBLE);
+        gameOver.setVisibility(View.GONE);
+        newgame.setVisibility(View.GONE);
     }
 }

@@ -68,6 +68,8 @@ class Armada extends Sprite{
             state = 0;
         }
 
+
+
         Iterator<Alien> it = alien.iterator();
         while(it.hasNext()){
             Sprite s = it.next();
@@ -106,5 +108,11 @@ class Armada extends Sprite{
 
             }
         }
+    }
+
+    public boolean land() {
+        if (alien.isEmpty()) return false;
+        RectF bounds = getBoundingBox();
+        return bounds.bottom>=GameView.SIZE_Y;
     }
 }
